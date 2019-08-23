@@ -154,14 +154,16 @@ rmse(val_set$SalePrice_log, y_pred)
 
 
 ##------------------------------------------------
-## Part 4 : Random Forest
+## Random Forest
 ##------------------------------------------------
 # Fitting Random Forest Regression to the dataset
 # library(randomForest)
 set.seed(1)
 regressor <- randomForest(formula = SalePrice_log ~ .,
                           data = training_set,
-                          ntree = 450
+                          ntree = 450, 
+                          proximity = TRUE,
+                          mtry = 4
                           )
 
 # Predicting the Test set results
@@ -173,11 +175,17 @@ rmse(val_set$SalePrice_log, y_pred)
 # Observe that what is the best number of trees
 plot(regressor)
 
-#tune mtry value, 沒用的東西
+#tune mtry value
 tuneRF(training_set[,-14], training_set[,14])
 
+#變數重要性
+importance(regressor)
+
+#變數重要性圖型
+varImpPlot(regressor)
+
 ##------------------------------------------------
-## Part 5 : XGBoost
+## XGBoost
 ##------------------------------------------------
 # library(xgboost)
 # 因XGBoost是吃matrix的格式，故須將所有資料皆轉換為數值型，存入矩陣中
@@ -198,11 +206,11 @@ dval <- xgb.DMatrix(data = as.matrix(val_set_new))
 param <-list(objective = "reg:linear",
              booster = "gbtree",
              eta = 0.01, #default = 0.3
-             gamma=0,
-             max_depth=3, #default=6
-             min_child_weight=4, #default=1
-             subsample=1,
-             colsample_bytree=1
+             gamma = 0,
+             max_depth = 3, #default=6
+             min_child_weight = 4, #default=1
+             subsample = 0.5,
+             colsample_bytree = 1
 )
 
 # Fitting XGBoost to the Training set
